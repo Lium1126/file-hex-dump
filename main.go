@@ -9,6 +9,12 @@ import (
 	"github.com/Lium1126/hexdump/internal/pkg/logger"
 )
 
+func fclose(f *os.File) {
+	if err := f.Close(); err != nil {
+		logger.LogErr("Failed to close the file.", "err", err)
+	}
+}
+
 func main() {
 	logger.InitZap()
 
@@ -23,12 +29,7 @@ func main() {
 		logger.LogErr("Cannot open the file.", "err", err)
 		return
 	}
-	defer func() {
-		err := fr.Close()
-		if err != nil {
-			logger.LogErr("Failed to close the input file.", "err", err)
-		}
-	}()
+	defer fclose(fr)
 	logger.LogDebug("Input file open successfully.", "filename", fr_name)
 
 	// open the output file
@@ -37,12 +38,7 @@ func main() {
 		logger.LogErr("Cannot create the file.", "err", err)
 		return
 	}
-	defer func() {
-		err := fw.Close()
-		if err != nil {
-			logger.LogErr("Failed to close the output file.", "err", err)
-		}
-	}()
+	defer fclose(fw)
 	logger.LogDebug("Output file open successfully.", "filename", fw_name)
 
 	scanner := bufio.NewScanner(fr)
