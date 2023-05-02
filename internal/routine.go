@@ -5,11 +5,9 @@ import (
 	"sync"
 )
 
-func RoutineProcess(ProcessC <-chan *Context) {
-	for ctx := range ProcessC {
-		ctx.process()
-		ctx.Unlock()
-	}
+func RoutineProcess(ctx *Context) {
+	ctx.process()
+	ctx.Unlock()
 }
 
 func RoutineWrite(WriteC <-chan *Context, f *os.File, wg *sync.WaitGroup) {

@@ -53,17 +53,16 @@ func main() {
 	}
 
 	wg.Add(len(ctxs))
-	ProcessC := make(chan *internal.Context, len(ctxs))
 	WriteC := make(chan *internal.Context, len(ctxs))
-	for i := 0; i < len(ctxs); i++ {
-		go internal.RoutineProcess(ProcessC)
-	}
 	go internal.RoutineWrite(WriteC, fw, &wg)
 
 	for _, ctx := range ctxs {
 		ctx.Lock()
 		WriteC <- ctx
-		ProcessC <- ctx
+	}
+
+	for _, ctx := range ctxs {
+		go internal.RoutineProcess(ctx)
 	}
 
 	wg.Wait()
