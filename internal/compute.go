@@ -8,7 +8,7 @@ import (
 
 func Compute(fr *os.File, fw *os.File) {
 	var wg sync.WaitGroup
-	var ctxs []*Context
+	var ctxs []*context
 
 	scanner := bufio.NewScanner(fr)
 	for scanner.Scan() {
@@ -16,7 +16,7 @@ func Compute(fr *os.File, fw *os.File) {
 	}
 
 	wg.Add(len(ctxs))
-	WriteC := make(chan *Context, len(ctxs))
+	WriteC := make(chan *context, len(ctxs))
 	go RoutineWrite(WriteC, fw, &wg)
 
 	for _, ctx := range ctxs {
