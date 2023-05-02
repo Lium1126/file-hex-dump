@@ -26,7 +26,7 @@ import (
    Returns:
      - None
 */
-func Compute(fr *os.File, fw *os.File) {
+func Compute(fr *os.File) {
 	var wg sync.WaitGroup
 	var ctxs []*context
 
@@ -37,7 +37,7 @@ func Compute(fr *os.File, fw *os.File) {
 
 	wg.Add(len(ctxs))
 	writeC := make(chan *context, len(ctxs))
-	go routineWrite(writeC, fw, &wg)
+	go routineWrite(writeC, &wg)
 
 	for _, ctx := range ctxs {
 		ctx.Lock()

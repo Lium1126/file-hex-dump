@@ -1,7 +1,7 @@
 package internal
 
 import (
-	"os"
+	"fmt"
 	"sync"
 )
 
@@ -61,10 +61,10 @@ func routineProcess(ctx *context) {
    wg.Wait()
    // Output file now contains the hash values in a consistent order.
 */
-func routineWrite(WriteC <-chan *context, f *os.File, wg *sync.WaitGroup) {
+func routineWrite(WriteC <-chan *context, wg *sync.WaitGroup) {
 	for ctx := range WriteC {
 		ctx.Lock()
-		f.Write([]byte(ctx.hash + "\n"))
+		fmt.Println(ctx.hash)
 		ctx.Unlock()
 		wg.Done()
 	}

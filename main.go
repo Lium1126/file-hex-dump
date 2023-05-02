@@ -20,8 +20,6 @@ func main() {
 
 	// fr_name is name of input file.
 	fr_name := "example.txt"
-	// fw_name is name of output file.
-	fw_name := "output.txt"
 
 	// open the input file
 	fr, err := os.Open(fr_name)
@@ -32,14 +30,5 @@ func main() {
 	defer fclose(fr)
 	logger.LogDebug("input file open successfully.", "filename", fr_name)
 
-	// open the output file
-	fw, err := os.Create(fw_name)
-	if err != nil {
-		logger.LogErr("cannot create the file.", "error", err)
-		return
-	}
-	defer fclose(fw)
-	logger.LogDebug("output file open successfully.", "filename", fw_name)
-
-	internal.Compute(fr, fw)
+	internal.Compute(fr)
 }
