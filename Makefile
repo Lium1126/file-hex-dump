@@ -18,7 +18,7 @@ cmd-help: ## Display help during command execution
 version: ## Display version
 	$(GORUN) ./main.go --version
 
-go-lint: ## Run static checks
+go-lint: ## Run static analysis
 	$(GOLANGCI) run --config=.golangci.yml ./...
 
 go-test: ## Run go test

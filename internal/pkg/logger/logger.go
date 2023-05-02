@@ -11,18 +11,19 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-var logLevel zap.AtomicLevel
-
 // InitZap provides logging with zap.
-func InitZap(dm bool) error {
-	logLevel = zap.NewAtomicLevelAt(zapcore.DebugLevel)
+func InitZap(debugMode bool) error {
+	logLevel := zap.NewAtomicLevelAt(zapcore.DebugLevel)
 
-	var f *os.File
-	var err error
-	if dm {
-		f = os.Stdout
+	var (
+		file *os.File
+		err  error
+	)
+
+	if debugMode {
+		file = os.Stdout
 	} else {
-		f, err = setFile()
+		file, err = setFile()
 		if err != nil {
 			return err
 		}
@@ -30,7 +31,7 @@ func InitZap(dm bool) error {
 
 	core := zapcore.NewCore(
 		zapcore.NewJSONEncoder(config()),
-		zapcore.AddSync(f),
+		zapcore.AddSync(file),
 		logLevel,
 	)
 
@@ -43,7 +44,7 @@ func InitZap(dm bool) error {
 	return nil
 }
 
-// config returns EncoderConfig for production environments
+// config returns EncoderConfig for production environments.
 func config() zapcore.EncoderConfig {
 	cfg := zap.NewProductionEncoderConfig()
 
@@ -72,7 +73,7 @@ func setFile() (*os.File, error) {
 	if _, err := os.Stat(content); err != nil {
 		if os.IsNotExist(err) {
 			if _, err := os.Create(content); err != nil {
-				fmt.Println(err)
+				return nil, err
 			}
 		} else {
 			return nil, err
@@ -83,15 +84,16 @@ func setFile() (*os.File, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return f, nil
 }
 
-// LogDebug is Key-value format debug log
+// LogDebug is Key-value format debug log.
 func LogDebug(msg string, kv ...interface{}) {
 	zap.S().Debugw(msg, kv...)
 }
 
-// LogErr is Key-value format error log
+// LogErr is Key-value format error log.
 func LogErr(msg string, kv ...interface{}) {
 	zap.S().Errorw(msg, kv...)
 }
@@ -100,7 +102,7 @@ func LogErr(msg string, kv ...interface{}) {
 // can be any of:
 // ["DEBUG", "INFO", "WARNING", "ERROR", "PANIC", "FATAL"],
 // case-insensitive.
-func SetLevel(level string) error {
+func SetLevel(level string, logLevel *zap.AtomicLevel) error {
 	switch strings.ToUpper(level) {
 	case "DEBUG":
 		logLevel.SetLevel(zapcore.DebugLevel)
@@ -124,6 +126,6 @@ func SetLevel(level string) error {
 }
 
 // GetLevel returns the current log level.
-func GetLevel() zapcore.Level {
+func GetLevel(logLevel *zap.AtomicLevel) zapcore.Level {
 	return logLevel.Level()
 }

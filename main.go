@@ -1,3 +1,4 @@
+// Package main contains the main work of file HEX dump.
 package main
 
 import (
@@ -10,22 +11,21 @@ import (
 )
 
 var (
-	Cmd = kingpin.CommandLine
+	cmd = kingpin.CommandLine
 
-	debug = Cmd.Flag("debug", "Enable debug mode.").Short('d').Bool()
-	fname = Cmd.Arg("src-file", "Source file").String()
+	debug = cmd.Flag("debug", "Enable debug mode.").Short('d').Bool()
+	fname = cmd.Arg("src-file", "Source file").String()
 )
 
 func init() {
-	Cmd.Name = "myhexdump"
-	Cmd.Help = "Print HEX Dump of SHA256 from file content."
-	Cmd.Version("0.0.1")
+	cmd.Name = "myhexdump"
+	cmd.Help = "Print HEX Dump of SHA256 from file content."
+	cmd.Version("0.0.1")
 }
 
 func main() {
 	// CLI parse
-	_, err := Cmd.Parse(os.Args[1:])
-	if err != nil {
+	if _, err := cmd.Parse(os.Args[1:]); err != nil {
 		fmt.Printf("failed to parce of command line: %v\n", err.Error())
 		os.Exit(1)
 	}
@@ -37,19 +37,21 @@ func main() {
 	}
 
 	// File open
-	f, err := os.Open(*fname)
+	filePointer, err := os.Open(*fname)
 	if err != nil {
 		logger.LogErr("fail to open the file.", "error", err, "filename", *fname)
+
 		return
 	}
+
 	defer func(*os.File) {
-		if err := f.Close(); err != nil {
+		if err := filePointer.Close(); err != nil {
 			logger.LogErr("failed to close the file.", "error", err)
 		} else {
 			logger.LogDebug("file close successfully.")
 		}
-	}(f)
+	}(filePointer)
 	logger.LogDebug("file open successfully.")
 
-	internal.Compute(f)
+	internal.Compute(filePointer)
 }
