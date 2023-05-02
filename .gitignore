@@ -23,3 +23,6 @@ go.work
 # other
 output.txt
 log.json
+cover.out
+cover.html
+main

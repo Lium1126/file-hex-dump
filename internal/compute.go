@@ -26,11 +26,11 @@ import (
    Returns:
      - None
 */
-func Compute(fr *os.File) {
+func Compute(f *os.File) {
 	var wg sync.WaitGroup
 	var ctxs []*context
 
-	scanner := bufio.NewScanner(fr)
+	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
 		ctxs = append(ctxs, newContext(scanner.Text()))
 	}
