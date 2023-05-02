@@ -2,49 +2,69 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	"os"
-	"time"
+	"sync"
 
+	"github.com/Lium1126/hexdump/internal"
 	"github.com/Lium1126/hexdump/internal/pkg/logger"
 )
 
 func fclose(f *os.File) {
 	if err := f.Close(); err != nil {
-		logger.LogErr("Failed to close the file.", "err", err)
+		logger.LogErr("failed to close the file.", "error", err)
+		return
 	}
+	logger.LogDebug("file close successfully.")
 }
 
 func main() {
 	logger.InitZap()
 
-	// fr_name is name of input file
+	// fr_name is name of input file.
 	fr_name := "example.txt"
-	// fw_name is name of output file
+	// fw_name is name of output file.
 	fw_name := "output.txt"
 
 	// open the input file
 	fr, err := os.Open(fr_name)
 	if err != nil {
-		logger.LogErr("Cannot open the file.", "err", err)
+		logger.LogErr("cannot open the file.", "error", err)
 		return
 	}
 	defer fclose(fr)
-	logger.LogDebug("Input file open successfully.", "filename", fr_name)
+	logger.LogDebug("input file open successfully.", "filename", fr_name)
 
 	// open the output file
 	fw, err := os.Create(fw_name)
 	if err != nil {
-		logger.LogErr("Cannot create the file.", "err", err)
+		logger.LogErr("cannot create the file.", "error", err)
 		return
 	}
 	defer fclose(fw)
-	logger.LogDebug("Output file open successfully.", "filename", fw_name)
+	logger.LogDebug("output file open successfully.", "filename", fw_name)
+
+	// processing
+	var wg sync.WaitGroup
+	var ctxs []*internal.Context
 
 	scanner := bufio.NewScanner(fr)
-
 	for scanner.Scan() {
-		fmt.Println(scanner.Text())
-		time.Sleep(time.Second * 1)
+		ctxs = append(ctxs, internal.NewContext(scanner.Text()))
 	}
+
+	wg.Add(len(ctxs))
+	ProcessC := make(chan *internal.Context, len(ctxs))
+	WriteC := make(chan *internal.Context, len(ctxs))
+	for i := 0; i < len(ctxs); i++ {
+		go internal.RoutineProcess(ProcessC)
+	}
+	go internal.RoutineWrite(WriteC, fw, &wg)
+
+	for _, ctx := range ctxs {
+		ctx.Lock()
+		WriteC <- ctx
+		ProcessC <- ctx
+	}
+
+	wg.Wait()
 }
