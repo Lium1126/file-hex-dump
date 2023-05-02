@@ -4,6 +4,7 @@ package logger
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"go.uber.org/zap"
@@ -13,21 +14,33 @@ import (
 var logLevel zap.AtomicLevel
 
 // InitZap provides logging with zap.
-func InitZap() {
+func InitZap(dm bool) error {
 	logLevel = zap.NewAtomicLevelAt(zapcore.DebugLevel)
 
-	// Standard output
-	stdCore := zapcore.NewCore(
+	var f *os.File
+	var err error
+	if dm {
+		f = os.Stdout
+	} else {
+		f, err = setFile()
+		if err != nil {
+			return err
+		}
+	}
+
+	core := zapcore.NewCore(
 		zapcore.NewJSONEncoder(config()),
-		zapcore.AddSync(os.Stdout),
+		zapcore.AddSync(f),
 		logLevel,
 	)
 
 	logger := zap.New(zapcore.NewTee(
-		stdCore,
+		core,
 	))
 
 	zap.ReplaceGlobals(logger)
+
+	return nil
 }
 
 // config returns EncoderConfig for production environments
@@ -48,6 +61,29 @@ func config() zapcore.EncoderConfig {
 	cfg.EncodeCaller = zapcore.ShortCallerEncoder
 
 	return cfg
+}
+
+// setFile return the location where the log file will be placed.
+func setFile() (*os.File, error) {
+	dirPath := "."
+	fileName := "log.json"
+	content := filepath.Join(dirPath, fileName)
+
+	if _, err := os.Stat(content); err != nil {
+		if os.IsNotExist(err) {
+			if _, err := os.Create(content); err != nil {
+				fmt.Println(err)
+			}
+		} else {
+			return nil, err
+		}
+	}
+
+	f, err := os.OpenFile(content, os.O_APPEND|os.O_WRONLY, 0o600)
+	if err != nil {
+		return nil, err
+	}
+	return f, nil
 }
 
 // LogDebug is Key-value format debug log

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/Lium1126/hexdump/internal"
@@ -16,7 +17,10 @@ func fclose(f *os.File) {
 }
 
 func main() {
-	logger.InitZap()
+	if err := logger.InitZap(false); err != nil {
+		fmt.Printf("Failed to initiarize logger: %v\n", err.Error())
+		os.Exit(1)
+	}
 
 	// fr_name is name of input file.
 	fr_name := "example.txt"
