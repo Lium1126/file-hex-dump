@@ -10,7 +10,7 @@ type Context struct {
 	hash string
 }
 
-func NewContext(s string) *Context {
+func newContext(s string) *Context {
 	return &Context{
 		text: s,
 	}

@@ -1,9 +1,7 @@
 package main
 
 import (
-	"bufio"
 	"os"
-	"sync"
 
 	"github.com/Lium1126/hexdump/internal"
 	"github.com/Lium1126/hexdump/internal/pkg/logger"
@@ -43,27 +41,5 @@ func main() {
 	defer fclose(fw)
 	logger.LogDebug("output file open successfully.", "filename", fw_name)
 
-	// processing
-	var wg sync.WaitGroup
-	var ctxs []*internal.Context
-
-	scanner := bufio.NewScanner(fr)
-	for scanner.Scan() {
-		ctxs = append(ctxs, internal.NewContext(scanner.Text()))
-	}
-
-	wg.Add(len(ctxs))
-	WriteC := make(chan *internal.Context, len(ctxs))
-	go internal.RoutineWrite(WriteC, fw, &wg)
-
-	for _, ctx := range ctxs {
-		ctx.Lock()
-		WriteC <- ctx
-	}
-
-	for _, ctx := range ctxs {
-		go internal.RoutineProcess(ctx)
-	}
-
-	wg.Wait()
+	internal.Compute(fr, fw)
 }
