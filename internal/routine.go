@@ -3,6 +3,7 @@ package internal
 
 import (
 	"fmt"
+	"os"
 	"sync"
 )
 
@@ -19,7 +20,7 @@ func routineProcess(ctx *context) {
 func routineWrite(writeC <-chan *context, wg *sync.WaitGroup) {
 	for ctx := range writeC {
 		ctx.Lock()
-		fmt.Println(ctx.hash)
+		fmt.Fprintln(os.Stdout, ctx.hash)
 		ctx.Unlock()
 		wg.Done()
 	}

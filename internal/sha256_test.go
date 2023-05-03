@@ -1,14 +1,17 @@
-package internal
+package internal_test
 
 import (
 	"reflect"
 	"testing"
+
+	"github.com/Lium1126/hexdump/internal"
 )
 
-func Test_getSHA256Binary(t *testing.T) {
+func TestGetSHA256Binary(t *testing.T) {
 	type args struct {
 		s string
 	}
+
 	tests := []struct {
 		name string
 		args args
@@ -55,9 +58,10 @@ func Test_getSHA256Binary(t *testing.T) {
 			},
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := getSHA256Binary(tt.args.s); !reflect.DeepEqual(got, tt.want) {
+			if got := internal.GetSHA256Binary(tt.args.s); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("getSHA256Binary() = %v, want %v", got, tt.want)
 			}
 		})

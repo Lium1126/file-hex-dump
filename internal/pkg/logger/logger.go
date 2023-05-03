@@ -11,6 +11,8 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
+const permission = 0o600
+
 // InitZap provides logging with zap.
 func InitZap(debugMode bool) error {
 	logLevel := zap.NewAtomicLevelAt(zapcore.DebugLevel)
@@ -72,17 +74,17 @@ func setFile() (*os.File, error) {
 
 	if _, err := os.Stat(content); err != nil {
 		if os.IsNotExist(err) {
-			if _, err := os.Create(content); err != nil {
-				return nil, err
+			if _, err = os.Create(content); err != nil {
+				return nil, fmt.Errorf("failed to create file for log output: %w", err)
 			}
 		} else {
-			return nil, err
+			return nil, fmt.Errorf("a file in a bad state for reasons other than file not existing: %w", err)
 		}
 	}
 
-	f, err := os.OpenFile(content, os.O_APPEND|os.O_WRONLY, 0o600)
+	f, err := os.OpenFile(content, os.O_APPEND|os.O_WRONLY, permission)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to open file for log output: %w", err)
 	}
 
 	return f, nil

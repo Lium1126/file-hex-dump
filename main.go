@@ -2,7 +2,8 @@
 package main
 
 import (
-	"fmt"
+	"io"
+	"log"
 	"os"
 
 	"github.com/Lium1126/hexdump/internal"
@@ -10,30 +11,25 @@ import (
 	"github.com/alecthomas/kingpin/v2"
 )
 
-var (
-	cmd = kingpin.CommandLine
-
-	debug = cmd.Flag("debug", "Enable debug mode.").Short('d').Bool()
-	fname = cmd.Arg("src-file", "Source file").String()
-)
-
-func init() {
-	cmd.Name = "myhexdump"
-	cmd.Help = "Print HEX Dump of SHA256 from file content."
-	cmd.Version("0.0.1")
-}
-
 func main() {
+	// Application setting
+	var (
+		cmd   = kingpin.CommandLine
+		debug = cmd.Flag("debug", "Enable debug mode.").Short('d').Bool()
+		fname = cmd.Arg("src-file", "Source file").String()
+	)
+
+	cmd.Name, cmd.Help = "myhexdump", "Print HEX Dump of SHA256 from file content."
+	cmd.Version("0.0.1")
+
 	// CLI parse
 	if _, err := cmd.Parse(os.Args[1:]); err != nil {
-		fmt.Printf("failed to parce of command line: %v\n", err.Error())
-		os.Exit(1)
+		log.Fatal(err)
 	}
 
 	// Logger Initialization
 	if err := logger.InitZap(*debug); err != nil {
-		fmt.Printf("failed to initiarize logger: %v\n", err.Error())
-		os.Exit(1)
+		log.Fatal(err)
 	}
 
 	// File open
@@ -53,5 +49,6 @@ func main() {
 	}(filePointer)
 	logger.LogDebug("file open successfully.")
 
-	internal.Compute(filePointer)
+	reader := io.Reader(filePointer)
+	internal.Compute(&reader)
 }

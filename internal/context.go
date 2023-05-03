@@ -14,7 +14,9 @@ type context struct {
 // newContext creates a context data with an internal value of 's'.
 func newContext(s string) *context {
 	return &context{
-		text: s,
+		Mutex: sync.Mutex{},
+		text:  s,
+		hash:  "",
 	}
 }
 

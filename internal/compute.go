@@ -3,28 +3,28 @@ package internal
 
 import (
 	"bufio"
-	"os"
+	"io"
 	"sync"
 )
 
 // Compute computes the SHA256 checksum HEX dump in parallel for each line of the file
 // pointed to by the file pointer 'f', and outputs the processing results in the original order
 // of the lines.
-func Compute(f *os.File) {
+func Compute(file *io.Reader) {
 	var (
-		wg   sync.WaitGroup
-		ctxs []*context
+		waitGroup sync.WaitGroup
+		ctxs      []*context
 	)
 
-	scanner := bufio.NewScanner(f)
+	scanner := bufio.NewScanner(*file)
 	for scanner.Scan() {
 		ctxs = append(ctxs, newContext(scanner.Text()))
 	}
 
-	wg.Add(len(ctxs))
+	waitGroup.Add(len(ctxs))
 	writeC := make(chan *context, len(ctxs))
 
-	go routineWrite(writeC, &wg)
+	go routineWrite(writeC, &waitGroup)
 
 	for _, ctx := range ctxs {
 		ctx.Lock()
@@ -35,5 +35,5 @@ func Compute(f *os.File) {
 		go routineProcess(ctx)
 	}
 
-	wg.Wait()
+	waitGroup.Wait()
 }

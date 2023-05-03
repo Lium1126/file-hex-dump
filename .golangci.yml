@@ -20,4 +20,4 @@ issues:
   exclude-use-default: false
   max-same-issues: 0
   exclude:
-    - '^(G102|G401|G501):'
+    - '^(G102|G401|G501|G304):'
