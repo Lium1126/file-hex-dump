@@ -20,7 +20,8 @@ func main() {
 	)
 
 	cmd.Name, cmd.Help = "myhexdump", "Print HEX Dump of SHA256 from file content."
-	cmd.Version("0.0.1")
+	cmd.HelpFlag.Short('h')
+	cmd.Version("0.0.1").VersionFlag.Short('v')
 
 	// CLI parse
 	if _, err := cmd.Parse(os.Args[1:]); err != nil {
