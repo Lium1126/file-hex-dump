@@ -19,7 +19,7 @@ func main() {
 		fname = cmd.Arg("src-file", "Source file").String()
 	)
 
-	cmd.Name, cmd.Help = "myhexdump", "Print HEX Dump of SHA256 from file content."
+	cmd.Name, cmd.Help = "myhexdump", "Print HEX Dump of SHA256 from file contents."
 	cmd.HelpFlag.Short('h')
 	cmd.Version("0.0.1").VersionFlag.Short('v')
 
